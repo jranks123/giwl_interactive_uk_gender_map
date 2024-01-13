@@ -49,12 +49,13 @@ html, body {
 }
 
 #map__text tr:nth-child(odd) {
-  background-color: #f9f9f9;
+    background-color: #f9f9f9;
 }
 
 #map__text tr:hover {
   background-color: #f1f1f1;
 }
+
 
 #toggle-btn {
   background-color: #3498db; /* Change to your desired button background color */

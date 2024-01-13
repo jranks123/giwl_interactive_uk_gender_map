@@ -67,24 +67,35 @@ function mouseOverHandler(d, i) {
 }
 
 function mouseOutHandler(d, i) {
-  d3.select(this).attr("fill", color(i))
+  if (!d3.select(this).classed("selected")) {
+    d3.select(this).attr("fill", color(i));
+  }
 }
 
 function clickHandler(d, i) {
-  const ladCode = d.properties.LAD13NM;
-  const unfilteredData = districtData[ladCode];
 
+  const ladCode = d.properties.LAD13NM;
+
+
+  svg.selectAll("path.selected")
+  .classed("selected", false)
+  .attr("fill", color(i));
+
+  d3.select(this).classed("selected", true);
+
+  if ( districtData[ladCode]) {
+
+  const unfilteredData = districtData[ladCode] ;
   const excludedFields = ["lad_code", "region_code", "country"];
 
-  // Filter out excluded fields from data
-const data = Object.keys(unfilteredData)
-  .filter(key => !excludedFields.includes(key))
-  .reduce((obj, key) => {
-    obj[key] = unfilteredData[key];
-    return obj;
-  }, {});
+    // Filter out excluded fields from data
+  const data = Object.keys(unfilteredData)
+    .filter(key => !excludedFields.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = unfilteredData[key];
+      return obj;
+    }, {});
 
-  if (data) {
     let displayText = `<h3>You've selected ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
     displayText += "<div id=\"data-table\"><table>";
     for (const key in data) {
@@ -94,24 +105,30 @@ const data = Object.keys(unfilteredData)
     }
     displayText += "</table></div>";
     d3.select("#map__text").html(displayText);
+    // Add the 'selected' class to the clicked district path
+
   } else {
     d3.select("#map__text").text(`No data available for ${ladCode}`);
   }
 
-  // Show the toggle button when a district is selected
-document.getElementById('toggle-btn').style.display = 'block';
 
-// Change the icon based on the visibility of the table
-document.getElementById('toggle-btn').onclick = function() {
-  const mapText = document.getElementById('data-table');
-  if (mapText.style.display === 'none') {
-    mapText.style.display = 'block';
-    this.innerHTML = 'Hide data';
-  } else {
-    mapText.style.display = 'none';
-    this.innerHTML = 'Show data';
-  }
-};
+
+    // Show the toggle button when a district is selected
+  document.getElementById('toggle-btn').style.display = 'block';
+
+  // Change the icon based on the visibility of the table
+  document.getElementById('toggle-btn').onclick = function() {
+    const mapText = document.getElementById('data-table');
+    if (mapText.style.display === 'none') {
+      mapText.style.display = 'block';
+      this.innerHTML = 'Hide data';
+    } else {
+      mapText.style.display = 'none';
+      this.innerHTML = 'Show data';
+    }
+  };
+
+
 }
 
 function clickToZoom(zoomStep) {
