@@ -1,0 +1,57 @@
+html, body {
+  height: 100%;
+}
+
+#map__container {
+  height: 100%;
+}
+
+#btn-zoom {
+  position: absolute;
+  top: 45px;
+  left: 10px;
+  z-index: 10;
+}
+
+#map__text {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 300px;
+  font-family: Arial, sans-serif;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+#map__text h3 {
+  margin-top: 0;
+}
+
+#map__text table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+#map__text th, #map__text td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+#map__text th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+#map__text tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+#map__text tr:hover {
+  background-color: #f1f1f1;
+}
