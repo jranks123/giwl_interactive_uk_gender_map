@@ -55,3 +55,22 @@ html, body {
 #map__text tr:hover {
   background-color: #f1f1f1;
 }
+
+#toggle-btn {
+  background-color: #3498db; /* Change to your desired button background color */
+  color: #fff; /* Text color */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease; /* Smooth color transition on hover */
+}
+
+#toggle-btn:hover {
+  background-color: #2980b9; /* Change to your desired button background color on hover */
+}
+
+#data-table{
+  margin-top: 20px;
+}

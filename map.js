@@ -70,36 +70,38 @@ function mouseOutHandler(d, i) {
   d3.select(this).attr("fill", color(i))
 }
 
-// function clickHandler(d, i) {
-//   const districtName = d.properties.LAD13NM;
-//   console.log(districtName)
-//     const data = districtData[districtName];
-//   console.log(districtData)
-//   if (data) {
-//       // Update this part to display the data as needed
-//       d3.select("#map__text").text(`You've selected ${districtName} District: ${JSON.stringify(data)}`);
-//   } else {
-//       d3.select("#map__text").text(`No data available for ${districtName} District`);
-//   }
-// }
-
 function clickHandler(d, i) {
   const ladCode = d.properties.LAD13NM;
   const data = districtData[ladCode];
 
   if (data) {
-    let displayText = `<h3>You've selected ${data.lad_name} District</h3>`;
-    displayText += "<table>";
+    let displayText = `<h3>You've selected ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
+    displayText += "<div id=\"data-table\"><table>";
     for (const key in data) {
       if (data.hasOwnProperty(key)) {
         displayText += `<tr><td><strong>${key}</strong></td><td>${data[key]}</td></tr>`;
       }
     }
-    displayText += "</table>";
+    displayText += "</table></div>";
     d3.select("#map__text").html(displayText);
   } else {
     d3.select("#map__text").text(`No data available for ${ladCode}`);
   }
+
+  // Show the toggle button when a district is selected
+document.getElementById('toggle-btn').style.display = 'block';
+
+// Change the icon based on the visibility of the table
+document.getElementById('toggle-btn').onclick = function() {
+  const mapText = document.getElementById('data-table');
+  if (mapText.style.display === 'none') {
+    mapText.style.display = 'block';
+    this.innerHTML = 'Hide data';
+  } else {
+    mapText.style.display = 'none';
+    this.innerHTML = 'Show data';
+  }
+};
 }
 
 function clickToZoom(zoomStep) {
@@ -185,3 +187,19 @@ function renderMap(root) {
     .attr("dy", d => _.get(d, "offset[1]", null))
     .text(d => d.properties.name);
 }
+
+let isTableVisible = false;
+
+// Toggle button click event
+document.getElementById('toggle-btn').addEventListener('click', () => {
+  const mapText = document.getElementById('map__text');
+  isTableVisible = !isTableVisible;
+
+  if (isTableVisible) {
+    mapText.style.display = 'block';
+    document.getElementById('toggle-btn').textContent = 'Hide Data';
+  } else {
+    mapText.style.display = 'none';
+    document.getElementById('toggle-btn').textContent = 'Show Data';
+  }
+});

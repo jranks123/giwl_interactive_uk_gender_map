@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
   <link rel="stylesheet" href="styles.css">
   <title>Map of Hong Kong</title>
-  <!-- Global Site Tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62809346-2"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -19,13 +18,24 @@
   </script>
 </head>
 <body>
-  <h3 id="map__text">Select a district on the map ...</h3>
+  <h3 id="map__text">Select a district on the map...</h3>
+
+  <!-- Toggle Button (Initially Hidden) -->
+  <div id="toggle-btn" style="display: none; position: absolute; top: 25px; right: 25px; cursor: pointer;">
+    <i class="fa fa-chevron-up" aria-hidden="true"></i>
+  </div>
+
   <div id="btn-zoom">
     <i id="btn-zoom--in" class="fa fa-search-plus fa-2x" aria-hidden="true"></i>
     <i id="btn-zoom--out"class="fa fa-search-minus fa-2x" aria-hidden="true"></i>
   </div>
   <div id="map__container"></div>
-  <a href="https://github.com/ivan-ha/d3-hk-map"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+  <a href="https://github.com/ivan-ha/d3-hk-map">
+    <img style="position: absolute; top: 0; right: 0; border: 0;"
+         src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67"
+         alt="Fork me on GitHub"
+         data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png">
+  </a>
 
   <script src="uk_map_geo.js"></script>
   <script src="map.js"></script>
