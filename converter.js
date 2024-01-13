@@ -1,3 +1,5 @@
+// this script will convert a topo file to a geo one
+
 const fs = require('fs');
 const topojson = require('topojson-client');
 
