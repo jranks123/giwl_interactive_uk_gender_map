@@ -75,13 +75,14 @@ function mouseOutHandler(d, i) {
 function clickHandler(d, i) {
 
   const ladCode = d.properties.LAD13NM;
-
+  const isSelected = d3.select(this).classed("selected");
 
   svg.selectAll("path.selected")
   .classed("selected", false)
   .attr("fill", color(i));
 
   d3.select(this).classed("selected", true);
+  d3.select(this).attr("fill", HOVER_COLOR);
 
   if ( districtData[ladCode]) {
 
