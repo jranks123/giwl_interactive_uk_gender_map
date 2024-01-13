@@ -169,8 +169,8 @@ g
 // projection config.
 const projection = d3
   .geoMercator()
-  .center([-0.9, 52.7]) // Center coordinates for the UK
-  .scale(4000) // Adjust the scale as needed
+  .center([-2.2, 54.7]) // Center coordinates for the UK
+  .scale(2200) // Adjust the scale as needed
   .translate([WIDTH / 2, HEIGHT / 2]);
 
 // --------------- Step 3 ---------------

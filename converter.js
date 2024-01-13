@@ -3,7 +3,7 @@
 const fs = require('fs');
 const topojson = require('topojson-client');
 
-const topojsonData = JSON.parse(fs.readFileSync('./uk_map.json', 'utf8'));
+const topojsonData = JSON.parse(fs.readFileSync('./topos/scotland_topo.json', 'utf8'));
 const geojsonData = topojson.feature(topojsonData, topojsonData.objects.lad);
 
-fs.writeFileSync('./uk_map_geo.json', JSON.stringify(geojsonData, null, 2));
+fs.writeFileSync('./topos/scotland_map_geo.json', JSON.stringify(geojsonData, null, 2));
