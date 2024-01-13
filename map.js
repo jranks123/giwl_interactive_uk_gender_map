@@ -72,7 +72,17 @@ function mouseOutHandler(d, i) {
 
 function clickHandler(d, i) {
   const ladCode = d.properties.LAD13NM;
-  const data = districtData[ladCode];
+  const unfilteredData = districtData[ladCode];
+
+  const excludedFields = ["lad_code", "region_code", "country"];
+
+  // Filter out excluded fields from data
+const data = Object.keys(unfilteredData)
+  .filter(key => !excludedFields.includes(key))
+  .reduce((obj, key) => {
+    obj[key] = unfilteredData[key];
+    return obj;
+  }, {});
 
   if (data) {
     let displayText = `<h3>You've selected ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
