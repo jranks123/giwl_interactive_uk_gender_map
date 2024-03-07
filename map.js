@@ -7,82 +7,133 @@ const ZOOM_DURATION = 500;
 const ZOOM_IN_STEP = 2;
 const ZOOM_OUT_STEP = 1 / ZOOM_IN_STEP;
 const HOVER_COLOR = "#d36f80"
-let districtData = {};
-let womenData = {};
-let menData = {};
-let ratioData = {};
-let selectedData = districtData;
+let femaleIndexData = {};
+let maleIndexData = {};
+let genderEqualityIndexData = {};
+let selectedData = genderEqualityIndexData;
 selectedD = "";
 selectedI = "";
 selectedLAD = "";
+const colorScale = d3.scaleLinear()
+  .domain([0, 1]) // Domain from 0 to 1 for your data values
+  .range(["#fff", "#0000ff"]);
 
 // Function to load CSV file
-function loadCSVFile(url, callback) {
-    d3.csv(url, function(error, data) {
-        if (error) {
-            console.error('Error loading CSV file:', error);
-            return;
-        }
-        callback(data);
-    });
-}
-
-// Function to parse CSV data
-function parseCSV(data) {
-
-    data.forEach(function(row) {
-        districtData[row.lad_name] = row;
-        
-        womenData[row.lad_name] = {
-          "lad_code": row.lad_code
-          , "lad_name": row.lad_name
-          , "region_name": row.region_name
-          , "country": row.country 
-          , "Index": row.index_w
-          , "Paid Work": row.paid_work_w
-          , "Money": row.money_w
-          , "Unpaid Work": row.unpaid_work_w
-          , "Education": row.education_w
-          , "Power": row.power_w
-          , "Health": row.health_w
-        }
-
-        menData[row.lad_name] = {
-          "lad_code": row.lad_code
-          , "lad_name": row.lad_name
-          , "region_name": row.region_name
-          , "country": row.country 
-          ,"Index": row.index_m
-          , "Paid Work": row.paid_work_m
-          , "Money": row.money_m
-          , "Unpaid Work": row.unpaid_work_m
-          , "Education": row.education_m
-          , "Power": row.power_m
-          , "Health": row.health_m
-        }
-
-        ratioData[row.lad_name] = {
-          "lad_code": row.lad_code
-          , "lad_name": row.lad_name
-          , "region_name": row.region_name
-          , "country": row.country 
-          ,"Index": row.index_RatioMM
-          , "Paid Work": row.paid_work_RatioMM
-          , "Money": row.money_RatioMM
-          , "Unpaid Work": row.unpaid_work_RatioMM
-          , "Education": row.education_RatioMM
-          , "Power": row.power_RatioMM
-          , "Health": row.health_RatioMM
-        }
-
-    });
-
-
+function loadCSVFile(url, callback, param) {
+  return new Promise((resolve, reject) => {
+      d3.csv(url, function(error, data) {
+          if (error) {
+              console.error('Error loading CSV file:', error);
+              reject(error);
+              return;
+          }
+          const returnValue = callback(data, param);
+          resolve(returnValue);
+      });
+  });
 }
 
 
-// Load and parse the CSV file
-loadCSVFile('new_gender_data.csv', parseCSV);
+function checkIndicatorsHaveDescriptionsAndPrintDistinct(structuredData) {
+  let missingDescriptions = new Set(); // Use a Set to store unique indicator names
+
+  structuredData.forEach(data => {
+    data.domains.forEach(domain => {
+      domain.subdomains.forEach(subdomain => {
+        subdomain.indicators.forEach(indicator => {
+          if (!indicator.description || indicator.description.trim() === '') {
+            // Add the indicator name to the Set if the description is missing or empty
+            missingDescriptions.add(indicator.name);
+          }
+        });
+      });
+    });
+  });
+
+  if (missingDescriptions.size > 0) {
+    console.log("Indicators missing descriptions (distinct names):", Array.from(missingDescriptions));
+  } else {
+    console.log("All indicators have descriptions.");
+  }
+}
+
+function parseDescriptionsCsv(descriptionsCsvData) {
+  const descriptionsMap = {};
+  descriptionsCsvData.forEach(row => {
+    if (!descriptionsMap[row.Domain]) {
+      descriptionsMap[row.Domain] = {};
+    }
+    if (!descriptionsMap[row.Domain][row.Subdomain]) {
+      descriptionsMap[row.Domain][row.Subdomain] = {};
+    }
+    descriptionsMap[row.Domain][row.Subdomain][row.Indicator] = row.Description;
+  }); 
+  console.log(descriptionsMap);
+  return descriptionsMap;
+}
+
+function parseCsvToStructuredDataWithDescriptions(csvData, descriptionsMap) {
+  return csvData.map(row => {
+    const rowData = {
+      lad_name: row.lad_name,
+      lad_code: row.lad_code,
+      index_overall: row.INDEX_OVERALL,
+      domains: []
+    };
+
+    Object.keys(row).forEach(key => {
+      if (!['lad_name', 'lad_code', 'INDEX_OVERALL'].includes(key)) {
+        const parts = key.split('__').filter(Boolean);
+        let domain = rowData.domains.find(d => d.name === parts[0]);
+        if (!domain) {
+          domain = { name: parts[0], index: null, subdomains: [] };
+          rowData.domains.push(domain);
+        }
+
+        if (parts.length === 1) {
+          domain.index = parseFloat(row[key]);
+        } else if (parts.length >= 2) {
+          let subdomain = domain.subdomains.find(sd => sd.name === parts[1]);
+          if (!subdomain) {
+            subdomain = { name: parts[1], index: null, indicators: [] };
+            domain.subdomains.push(subdomain);
+          }
+          if (parts.length === 2) {
+            subdomain.index = parseFloat(row[key]);
+          } else if (parts.length === 3) {
+            const description = descriptionsMap[parts[0]]?.[parts[1]]?.[parts[2]] || '';
+            subdomain.indicators.push({ name: parts[2], index: parseFloat(row[key]), description });
+          }
+        }
+      }
+    });
+
+    return rowData;
+  });
+}
+
+// Usage example with Promises
+loadCSVFile('data/indicator_dictionary.csv', parseDescriptionsCsv)
+    .then(descriptionsMap => {
+        console.log("Descriptions Map Ready:", descriptionsMap);
+        return Promise.all([
+            loadCSVFile('data/female_index.csv', parseCsvToStructuredDataWithDescriptions, descriptionsMap),
+            loadCSVFile('data/male_index.csv', parseCsvToStructuredDataWithDescriptions, descriptionsMap),
+            loadCSVFile('data/gender_equality_index.csv', parseCsvToStructuredDataWithDescriptions, descriptionsMap)
+        ]);
+    })
+    .then(([femaleIndexData, maleIndexData, genderEqualityIndexData]) => {
+        // At this point, all CSVs have been loaded and processed
+        checkIndicatorsHaveDescriptionsAndPrintDistinct(femaleIndexData);
+        checkIndicatorsHaveDescriptionsAndPrintDistinct(maleIndexData);
+        checkIndicatorsHaveDescriptionsAndPrintDistinct(genderEqualityIndexData);
+        console.log(femaleIndexData);
+        console.log(maleIndexData);
+        console.log(genderEqualityIndexData);
+    })
+    .catch(error => {
+        console.error("An error occurred:", error);
+    });
 
 
 // --------------- Event handler ---------------
@@ -96,7 +147,9 @@ function zoomHandler() {
 }
 
 function mouseOverHandler(d, i) {
+  const value = parseFloat(selectedData[d.properties.LAD13NM][selectedIndex]);
   d3.select(this).attr("fill", HOVER_COLOR)
+  
 }
 
 function mouseOutHandler(d, i) {
@@ -165,7 +218,6 @@ function updateColours(selectedLAD, i) {
 
 function clickHandler(d, i) {
 
-  console.log("setting");
   selectedD = d;
   selectedI = i;
   selectedLAD = this;
@@ -289,38 +341,35 @@ function updateMapVisualization() {
       return; // Exit the function if the selected dataset is not recognized
   }
 
-  console.log("Hello");
-  console.log(selectedI);
-  console.log(selectedD);
-  console.log(selectedLAD);
-  if (selectedI != "" && selectedD != "") {    
-    console.log("Hello2");    
+
+  if (selectedI != "" && selectedD != "") {            
     updateText(selectedD);
     updateColours(selectedLAD, selectedI);
+    updateMapColors(document.getElementById('indexSelection').value);
   }
-  
-  
+}
 
-  // Assuming you have a global `g` variable for your map's <g> SVG element
-  // Update the map's paths with the new data
-  // const paths = g.selectAll("path")
-  //                .data(activeData); // Here, replace with the correct binding, possibly needing adjustment
+document.getElementById('indexSelection').addEventListener('change', function() {  
+  updateMapColors(this.value);
+});
 
-  // If your district data matches directly with GeoJSON features,
-  // you might need to join this `activeData` with your GeoJSON structure
-  // For demonstration, the code directly applies the dataset assuming a direct match
-
-  // Enter (if necessary) and update paths
-  // paths.enter()
-  //      .append("path")
-  //      .merge(paths)
-  //      .attr("d", path) // Make sure `path` is your geoPath projection function
-  //      .attr("fill", (d, i) => colorScale(i)); // Example: use a color scale based on index
-
-  // Handle exit
-  // paths.exit().remove();
-
-  // Add any other necessary updates (e.g., event handlers, tooltips)
+function updateMapColors(selectedIndex) {  
+  // No index selected, retain existing color logic
+  if (selectedIndex === 'none') {  
+    g.selectAll("path")
+      .attr("fill", (d, i) => color(i)); // Your existing color logic
+  } else {
+    // An index is selected, color the LADs based on their value for the selected index
+    g.selectAll("path")
+      .attr("fill", d => {
+        if (d.properties && selectedData[d.properties.LAD13NM]) {
+          const value = parseFloat(selectedData[d.properties.LAD13NM][selectedIndex]); // Ensure this is a number          
+          return value != null ? colorScale(value) : "#ccc"; // Use a fallback color if no data
+        } else {
+          return "#ccc"; // Default color if properties are missing or LAD13NM is not in selectedData
+        }
+      });
+  }
 }
 
 // Listen for changes on the dropdown and update the map visualization
@@ -328,3 +377,5 @@ document.getElementById('datasetSelection').addEventListener('change', updateMap
 
 // Initial update call to render the default selected dataset view
 updateMapVisualization();
+updateMapColors(document.getElementById('indexSelection').value);
+
