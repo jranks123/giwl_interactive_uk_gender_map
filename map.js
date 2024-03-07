@@ -1,21 +1,3 @@
-/**
- * SVG structure:
- *   <svg> - container for entire map
- *     <g> - handle zoom and drag position
- *       <rect> - overlay a transparent layer for smooth zoom and drag
- *       <g> of <path> - each `path` is a district in the map
- *       <g> of <text> - districts' name
- *     </g>
- *   </svg>
- *
- * Reference:
- *   http://www.ourd3js.com/wordpress/296/
- *   https://bl.ocks.org/mbostock/4e3925cdc804db257a86fdef3a032a45
- *   https://stackoverflow.com/questions/35443768/how-do-i-fix-zooming-and-panning-in-my-cluster-bundle-graph
- *   https://groups.google.com/forum/#!topic/d3-js/OAJgdKtn1TE
- *   https://groups.google.com/forum/#!topic/d3-js/sg4pnuzWZUU
- */
-
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
 const ZOOM_THRESHOLD = [0.3, 7];
@@ -25,8 +7,14 @@ const ZOOM_DURATION = 500;
 const ZOOM_IN_STEP = 2;
 const ZOOM_OUT_STEP = 1 / ZOOM_IN_STEP;
 const HOVER_COLOR = "#d36f80"
-
 let districtData = {};
+let womenData = {};
+let menData = {};
+let ratioData = {};
+let selectedData = districtData;
+selectedD = "";
+selectedI = "";
+selectedLAD = "";
 
 // Function to load CSV file
 function loadCSVFile(url, callback) {
@@ -41,15 +29,60 @@ function loadCSVFile(url, callback) {
 
 // Function to parse CSV data
 function parseCSV(data) {
-    districtData = {};
+
     data.forEach(function(row) {
         districtData[row.lad_name] = row;
+        
+        womenData[row.lad_name] = {
+          "lad_code": row.lad_code
+          , "lad_name": row.lad_name
+          , "region_name": row.region_name
+          , "country": row.country 
+          , "Index": row.index_w
+          , "Paid Work": row.paid_work_w
+          , "Money": row.money_w
+          , "Unpaid Work": row.unpaid_work_w
+          , "Education": row.education_w
+          , "Power": row.power_w
+          , "Health": row.health_w
+        }
+
+        menData[row.lad_name] = {
+          "lad_code": row.lad_code
+          , "lad_name": row.lad_name
+          , "region_name": row.region_name
+          , "country": row.country 
+          ,"Index": row.index_m
+          , "Paid Work": row.paid_work_m
+          , "Money": row.money_m
+          , "Unpaid Work": row.unpaid_work_m
+          , "Education": row.education_m
+          , "Power": row.power_m
+          , "Health": row.health_m
+        }
+
+        ratioData[row.lad_name] = {
+          "lad_code": row.lad_code
+          , "lad_name": row.lad_name
+          , "region_name": row.region_name
+          , "country": row.country 
+          ,"Index": row.index_RatioMM
+          , "Paid Work": row.paid_work_RatioMM
+          , "Money": row.money_RatioMM
+          , "Unpaid Work": row.unpaid_work_RatioMM
+          , "Education": row.education_RatioMM
+          , "Power": row.power_RatioMM
+          , "Health": row.health_RatioMM
+        }
+
     });
+
+
 }
 
 
 // Load and parse the CSV file
-loadCSVFile('genderdata.csv', parseCSV);
+loadCSVFile('new_gender_data.csv', parseCSV);
 
 
 // --------------- Event handler ---------------
@@ -72,49 +105,37 @@ function mouseOutHandler(d, i) {
   }
 }
 
-function clickHandler(d, i) {
-
+function updateText(d) {
   const ladCode = d.properties.LAD13NM;
-  const isSelected = d3.select(this).classed("selected");
+  if ( selectedData[ladCode]) {
 
-  svg.selectAll("path.selected")
-  .classed("selected", false)
-  .attr("fill", color(i));
-
-  d3.select(this).classed("selected", true);
-  d3.select(this).attr("fill", HOVER_COLOR);
-
-  if ( districtData[ladCode]) {
-
-  const unfilteredData = districtData[ladCode] ;
-  const excludedFields = ["lad_code", "region_code", "country"];
-
-    // Filter out excluded fields from data
-  const data = Object.keys(unfilteredData)
-    .filter(key => !excludedFields.includes(key))
-    .reduce((obj, key) => {
-      obj[key] = unfilteredData[key];
-      return obj;
-    }, {});
-
-    let displayText = `<h3>You've selected ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
-    displayText += "<div id=\"data-table\"><table>";
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        displayText += `<tr><td><strong>${key}</strong></td><td>${data[key]}</td></tr>`;
+    const unfilteredData = selectedData[ladCode] ;
+    const excludedFields = ["lad_code", "region_code", "country"];
+  
+      // Filter out excluded fields from data
+    const data = Object.keys(unfilteredData)
+      .filter(key => !excludedFields.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = unfilteredData[key];
+        return obj;
+      }, {});
+  
+      let displayText = `<h3>You've selected ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
+      displayText += "<div id=\"data-table\"><table>";
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          displayText += `<tr><td><strong>${key}</strong></td><td>${data[key]}</td></tr>`;
+        }
       }
+      displayText += "</table></div>";
+      d3.select("#map__text").html(displayText);
+      // Add the 'selected' class to the clicked district path
+  
+    } else {
+      d3.select("#map__text").text(`No data available for ${ladCode}`);
     }
-    displayText += "</table></div>";
-    d3.select("#map__text").html(displayText);
-    // Add the 'selected' class to the clicked district path
 
-  } else {
-    d3.select("#map__text").text(`No data available for ${ladCode}`);
-  }
-
-
-
-    // Show the toggle button when a district is selected
+        // Show the toggle button when a district is selected
   document.getElementById('toggle-btn').style.display = 'block';
 
   // Change the icon based on the visibility of the table
@@ -128,8 +149,31 @@ function clickHandler(d, i) {
       this.innerHTML = 'Show data';
     }
   };
+  
+}
 
+function updateColours(selectedLAD, i) { 
+    const isSelected = d3.select(selectedLAD).classed("selected");
 
+    svg.selectAll("path.selected")
+    .classed("selected", false)
+    .attr("fill", color(i));
+
+    d3.select(selectedLAD).classed("selected", true);
+    d3.select(selectedLAD).attr("fill", HOVER_COLOR);
+}
+
+function clickHandler(d, i) {
+
+  console.log("setting");
+  selectedD = d;
+  selectedI = i;
+  selectedLAD = this;
+  
+
+  
+  updateColours(selectedLAD, selectedI);
+  updateText(d);
 }
 
 function clickToZoom(zoomStep) {
@@ -218,16 +262,69 @@ function renderMap(root) {
 
 let isTableVisible = false;
 
-// Toggle button click event
-document.getElementById('toggle-btn').addEventListener('click', () => {
-  const mapText = document.getElementById('map__text');
-  isTableVisible = !isTableVisible;
 
-  if (isTableVisible) {
-    mapText.style.display = 'block';
-    document.getElementById('toggle-btn').textContent = 'Hide Data';
-  } else {
-    mapText.style.display = 'none';
-    document.getElementById('toggle-btn').textContent = 'Show Data';
+
+// Function to update the map based on the selected dataset
+function updateMapVisualization() {  
+  // Get the selected dataset value from the dropdown
+  const selectedDataset = document.getElementById('datasetSelection').value;
+
+  // Determine which dataset to use based on the selection
+  let activeData;
+  switch (selectedDataset) {
+    case 'district':
+      selectedData = districtData;
+      break;
+    case 'women':
+      selectedData = womenData;
+      break;
+    case 'men':
+      selectedData = menData;
+      break;
+    case 'ratio':
+      selectedData = ratioData;
+      break;
+    default:
+      console.error('Selected dataset is not recognized.');
+      return; // Exit the function if the selected dataset is not recognized
   }
-});
+
+  console.log("Hello");
+  console.log(selectedI);
+  console.log(selectedD);
+  console.log(selectedLAD);
+  if (selectedI != "" && selectedD != "") {    
+    console.log("Hello2");    
+    updateText(selectedD);
+    updateColours(selectedLAD, selectedI);
+  }
+  
+  
+
+  // Assuming you have a global `g` variable for your map's <g> SVG element
+  // Update the map's paths with the new data
+  // const paths = g.selectAll("path")
+  //                .data(activeData); // Here, replace with the correct binding, possibly needing adjustment
+
+  // If your district data matches directly with GeoJSON features,
+  // you might need to join this `activeData` with your GeoJSON structure
+  // For demonstration, the code directly applies the dataset assuming a direct match
+
+  // Enter (if necessary) and update paths
+  // paths.enter()
+  //      .append("path")
+  //      .merge(paths)
+  //      .attr("d", path) // Make sure `path` is your geoPath projection function
+  //      .attr("fill", (d, i) => colorScale(i)); // Example: use a color scale based on index
+
+  // Handle exit
+  // paths.exit().remove();
+
+  // Add any other necessary updates (e.g., event handlers, tooltips)
+}
+
+// Listen for changes on the dropdown and update the map visualization
+document.getElementById('datasetSelection').addEventListener('change', updateMapVisualization);
+
+// Initial update call to render the default selected dataset view
+updateMapVisualization();

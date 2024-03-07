@@ -19,14 +19,34 @@
 </head>
 <body>
   <h3 id="map__text">Select a local authority district</h3>
+  <select id="datasetSelection">
+    <option value="district">District Data</option>
+    <option value="women">Women Data</option>
+    <option value="men">Men Data</option>
+    <option value="ratio">Ratio Data</option>
+  </select>
+  <select id="indexSelection">
+    <option value="none">None</option>
+    <option value="index">Index</option>
+    <option value="paidWork">Paid Work</option>
+    <option value="money">Money</option>
+    <option value="unpaidWork">Unpaid Work</option>
+    <option value="education">Education</option>
+    <option value="power">Power</option>
+    <option value="health">Health</option>
+  </select>
   <div id="btn-zoom">
     <i id="btn-zoom--in" class="fa fa-search-plus fa-2x" aria-hidden="true"></i>
     <i id="btn-zoom--out"class="fa fa-search-minus fa-2x" aria-hidden="true"></i>
   </div>
-  <div id="map__container"></div>
+  <div id="map__container">
+
+
+  </div>
 
 
   <script src="uk_map_geo.js"></script>
+  <script src="new_geo.js"></script>
   <script src="map.js"></script>
 </body>
 </html>
