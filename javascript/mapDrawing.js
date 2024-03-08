@@ -1,4 +1,4 @@
-import { getSelectedDataSet } from './utilities.js';
+import { getSelectedDataSet, getLADByName, getLadColour } from './utilities.js';
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
@@ -14,17 +14,18 @@ const projection = d3
 .scale(2200) // Adjust the scale as needed
 .translate([WIDTH / 2, HEIGHT / 2]);
 const HOVER_COLOR = "#d36f80";
-const colorScale = d3.scaleLinear()
-  .domain([0, 1]) // Domain from 0 to 1 for your data values
-  .range(["#fff", "#0000ff"]);
 const path = d3.geoPath().projection(projection);
 const color = d3.scaleOrdinal(d3.schemeCategory20c.slice(1, 4));  
 
 
-export function updateColourOfSelectedLAD(selectedLAD, i, svg) {    
+export function updateColourOfSelectedLAD(selectedLAD, i, svg, allDataSets) {    
+  
+
     svg.selectAll("path.selected")
     .classed("selected", false)
-    .attr("fill", color(i));
+    .attr("fill", d => {  
+      return getLadColour(allDataSets, d.properties.LAD13NM)        
+    });
 
     d3.select(selectedLAD).classed("selected", true);
     d3.select(selectedLAD).attr("fill", HOVER_COLOR);
@@ -42,16 +43,20 @@ function ladMouseOverHandler(lad, d, i, allDataSets) {
 
 function ladMouseOutHandler(lad, d, i, allDataSets) {
   if (!d3.select(lad).classed("selected")) {
-    d3.select(lad).attr("fill", color(i));
+    
+    const colour = getLadColour(allDataSets, d.properties.LAD13NM);
+
+    d3.select(lad).attr("fill", colour);
   }
 }
 
-function updateText(selectedLAD, allDataSets) {
+function updateText(ladObject, allDataSets) {
   const selectedDataSet = getSelectedDataSet(allDataSets);
-  const ladCode = selectedLAD.properties.LAD13NM;
-  if ( selectedDataSet[ladCode]) {
+  const lad =  getLADByName(selectedDataSet, ladObject.properties.LAD13NM)
+  
+  if (lad) {
 
-    const unfilteredData = selectedDataSet[ladCode] ;
+    const unfilteredData = lad;
     const excludedFields = ["lad_code", "region_code", "country"];
   
       // Filter out excluded fields from data
@@ -94,9 +99,9 @@ function updateText(selectedLAD, allDataSets) {
   
 }
 
-function ladClickHandler(lad, d, i, svg, allDataSets) { 
-  updateColourOfSelectedLAD(lad, i, svg);
-  updateText(lad, allDataSets);
+function ladClickHandler(ladPath, ladObject, ladNumber, svg, allDataSets) { 
+  updateColourOfSelectedLAD(ladPath, ladNumber, svg, allDataSets);
+  updateText(ladObject, allDataSets);
 }
 
 function clickToZoom(zoomStep, ZOOM_DURATION) {
@@ -198,7 +203,7 @@ export function updateMapVisualizationBasedOnDataSetChange(g, allDataSets, selec
         
     if (selectedI != undefined && selectedLAD != undefined) {            
       updateText(selectedLAD, allDataSets);
-      updateColourOfSelectedLAD(selectedLAD, selectedI, svg);      
+      updateColourOfSelectedLAD(selectedLAD, selectedI, svg, allDataSets);      
     }
     updateMapColors(g, allDataSets);
   }
@@ -211,20 +216,14 @@ export function updateMapVisualizationBasedOnDataSetChange(g, allDataSets, selec
 
     const selectedDataSet = getSelectedDataSet(allDataSets);
     // No index selected, retain existing color logic
-    if (true) {  
+    if (false) {  
       g.selectAll("path")
         .attr("fill", (d, i) => color(i)); // Your existing color logic
     } else {
       // An index is selected, color the LADs based on their value for the selected index
       g.selectAll("path")
-        .attr("fill", d => {            
-          if (d.properties && selectedDataSet[d.properties.LAD13NM]) {
-            const value = parseFloat(selectedDataSet[d.properties.LAD13NM].index_overall); // Ensure this is a number          
-            console.log(value);
-            return value != null ? colorScale(value) : "#ccc"; // Use a fallback color if no data
-          } else {
-            return "#ccc"; // Default color if properties are missing or LAD13NM is not in selectedData
-          }
+        .attr("fill", d => {  
+            return getLadColour(allDataSets, d.properties.LAD13NM)        
         });
     }
   }

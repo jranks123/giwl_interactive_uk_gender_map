@@ -15,7 +15,7 @@ export const calculatePercentileRanks = (values) => {
     let overallPercentiles = calculatePercentileRanks(overallIndexes);
   
     structuredData.forEach((lad, i) => {
-        lad.index_overall_percentile = overallPercentiles[i];
+        lad.index_overall_percentile = overallPercentiles[i].toFixed(2);
         lad.domains.forEach(domain => {
             const domainKey = `Domain-${domain.name}`;
             indexCollections[domainKey] = indexCollections[domainKey] || [];
@@ -36,26 +36,28 @@ export const calculatePercentileRanks = (values) => {
     });
     return indexCollections;
   }
-  
+
+
   export function calculateAndStorePercentiles(structuredData) {
-    
     // Prepare data: Collect all index values for efficient percentile calculation
     const indexCollections = collectIndexValuesForPercentileCalculation(structuredData);
+    
     // Calculate percentiles for each collection of index values
     Object.keys(indexCollections).forEach(key => {            
         const ranks = calculatePercentileRanks(indexCollections[key]);
+        
         // Store calculated percentiles back into the structuredData
         let keyParts = key.split('-');
         keyParts.shift(); // Remove the type part (Domain/Subdomain/Indicator)
-        let path = keyParts.join('__'); // Rebuild the path in the original naming scheme
+        
         structuredData.forEach(lad => {
             lad.domains.forEach(domain => {
                 if (key.startsWith('Domain') && domain.name === keyParts[0]) {
-                    domain.percentile = ranks.shift();
+                    domain.percentile = parseFloat(ranks.shift().toFixed(2));                    
                 } else if (key.startsWith('Subdomain') && domain.name === keyParts[0]) {
                     domain.subdomains.forEach(subdomain => {
                         if (subdomain.name === keyParts[1]) {
-                            subdomain.percentile = ranks.shift();
+                            subdomain.percentile = parseFloat(ranks.shift().toFixed(2));
                         }
                     });
                 } else if (key.startsWith('Indicator') && domain.name === keyParts[0]) {
@@ -63,7 +65,7 @@ export const calculatePercentileRanks = (values) => {
                         if (subdomain.name === keyParts[1]) {
                             subdomain.indicators.forEach(indicator => {
                                 if (indicator.name === keyParts[2]) {
-                                    indicator.percentile = ranks.shift();
+                                    indicator.percentile = parseFloat(ranks.shift().toFixed(2));
                                 }
                             });
                         }
@@ -72,4 +74,4 @@ export const calculatePercentileRanks = (values) => {
             });
         });
     });
-  }
+}
