@@ -19,27 +19,12 @@
 </head>
 <body>
   <h3 id="map__text">Select a local authority district</h3>
-  <select id="datasetSelection">
-    <option value="district">District Data</option>
-    <option value="women">Women Data</option>
-    <option value="men">Men Data</option>
-    <option value="ratio">Ratio Data</option>
+  <select id="indexSelection">    
+    <option value="femaleIndex">Female Index</option>
+    <option value="maleIndex">Male Index</option>
+    <option value="genderEqualityIndex">Gender Equality Index</option>
   </select>
-  <select id="indexSelection">
-    <option value="none">None</option>
-    <option value="Index">Index</option>
-    <option value="Paid Work">Paid Work</option>
-    <option value="Money">Money</option>
-    <option value="Unpaid Work">Unpaid Work</option>
-    <option value="Education">Education</option>
-    <option value="Power">Power</option>
-    <option value="Health">Health</option>
-  </select>
-  <select id="indexSelection">
-    <option value="none">Cobined Index</option>
-    <option value="Index">Subdomain: Average weekly hours</option>  
-    <option value="Index">Some other thing </option>  
-  </select>
+
   <div id="btn-zoom">
     <i id="btn-zoom--in" class="fa fa-search-plus fa-2x" aria-hidden="true"></i>
     <i id="btn-zoom--out"class="fa fa-search-minus fa-2x" aria-hidden="true"></i>
@@ -50,8 +35,7 @@
   </div>
 
 
-  <script src="uk_map_geo.js"></script>
-  <script src="new_geo.js"></script>
-  <script src="map.js"></script>
+  <script src="geojson/uk_map_geo.js"></script>
+  <script type="module" src="javascript/main.js"></script>
 </body>
 </html>
