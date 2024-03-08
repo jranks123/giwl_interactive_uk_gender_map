@@ -37,7 +37,7 @@ export function parseCsvToStructuredDataWithDescriptions(csvData, descriptionsMa
             lad_code: row.lad_code,
             index_overall: row.INDEX_OVERALL,
             domains: [],
-            indexDescriptor: ""
+            overallIndexDescriptor: ""
         };
 
         Object.keys(row).forEach(key => {
@@ -78,7 +78,7 @@ export function parseCsvToStructuredDataWithDescriptions(csvData, descriptionsMa
         });
 
         const domainLinks = rowData.domains.map(d => `#${d.name}`).join(", ");
-        rowData.indexDescriptor = `The overall index is calculated based on the averages or combinations of the indices of its domains: ${domainLinks}.`;
+        rowData.overallIndexDescriptor = `The overall index is calculated based on the averages or combinations of the indices of its domains: ${domainLinks}.`;
 
         return rowData;
     });

@@ -1,4 +1,4 @@
-import { getSelectedDataSet, getLADByName, getLadColour } from './utilities.js';
+import { getSelectedDataSet, getLADByName, getLadColour, getSelectedDomain, getSelectedIndicator, getSelectedSubdomain } from './utilities.js';
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
@@ -19,6 +19,22 @@ const color = d3.scaleOrdinal(d3.schemeCategory20c.slice(1, 4));
 
 
 
+
+
+export function updateMapAndTextBasedOnSelection(g, allDataSets) {
+
+  const selectedDataSet = getSelectedDataSet(allDataSets)
+  // Assuming you have a mechanism to filter or select data based on these parameters
+
+  // Update map colors
+  g.selectAll("path").attr("fill", d => {
+    const ladName = d.properties.LAD13NM;
+    return getLadColour(allDataSets, ladName);
+  });
+
+  // Update displayed text
+  //updateTextBasedOnSelection(filteredData, selectedDomain, selectedSubdomain, selectedIndicator);
+}
 
 
 
@@ -70,7 +86,7 @@ function updateText(ladObject, allDataSets) {
         return obj;
       }, {});
   
-      let displayText = `<h3>Local Authority District: ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
+      let displayText = `<h3>Local Authority District: ${unfilteredData.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
       displayText += "<div id=\"data-table\"><table>";
       for (const key in data) {
         if (data.hasOwnProperty(key)) {

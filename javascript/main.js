@@ -44,8 +44,7 @@ loadCSVFile('data/indicator_dictionary.csv', parseDescriptionsCsv)
         // Initial update call to render the default selected dataset view
         updateMapVisualizationBasedOnDataSetChange(g, allDataSets);
         updateMapColors(g, allDataSets);
-
-        populateDomains(allDataSets);
+        populateDomains(allDataSets, g);
 
 
     })

@@ -15,7 +15,7 @@ export const calculatePercentileRanks = (values) => {
     let overallPercentiles = calculatePercentileRanks(overallIndexes);
   
     structuredData.forEach((lad, i) => {
-        lad.index_overall_percentile = overallPercentiles[i].toFixed(2);
+        lad.percentile = overallPercentiles[i];
         lad.domains.forEach(domain => {
             const domainKey = `Domain-${domain.name}`;
             indexCollections[domainKey] = indexCollections[domainKey] || [];
@@ -37,7 +37,7 @@ export const calculatePercentileRanks = (values) => {
     return indexCollections;
   }
 
-
+  
   export function calculateAndStorePercentiles(structuredData) {
     // Prepare data: Collect all index values for efficient percentile calculation
     const indexCollections = collectIndexValuesForPercentileCalculation(structuredData);
@@ -53,7 +53,7 @@ export const calculatePercentileRanks = (values) => {
         structuredData.forEach(lad => {
             lad.domains.forEach(domain => {
                 if (key.startsWith('Domain') && domain.name === keyParts[0]) {
-                    domain.percentile = parseFloat(ranks.shift().toFixed(2));                    
+                    domain.percentile = parseFloat(ranks.shift().toFixed(2));
                 } else if (key.startsWith('Subdomain') && domain.name === keyParts[0]) {
                     domain.subdomains.forEach(subdomain => {
                         if (subdomain.name === keyParts[1]) {

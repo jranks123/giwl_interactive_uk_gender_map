@@ -1,5 +1,6 @@
 
-  import { getSelectedDataSet } from "./utilities.js";
+  import { getSelectedDataSet, getSelectedDomain, getSelectedSubdomain, getSelectedIndicator } from "./utilities.js";
+    import { updateMapAndTextBasedOnSelection } from "./mapDrawing.js";
 
   function updateSubdomains(selectedDomain, allDataSets) {
     const subdomainDropdown = document.getElementById('subdomainDropdown');
@@ -72,7 +73,7 @@
     }
   }
 
-  export function populateDomains(allDataSets) {
+  export function populateDomains(allDataSets, g) {
     
     const data = getSelectedDataSet(allDataSets)
 
@@ -99,11 +100,19 @@
     document.getElementById('domainDropdown').addEventListener('change', (e) => {
         updateSubdomains(e.target.value, allDataSets);
         updateIndicators('all', allDataSets); // Reset indicators when domain changes
+        updateMapAndTextBasedOnSelection(g, allDataSets, getSelectedDomain(), getSelectedSubdomain(), getSelectedIndicator());
     });
     
     document.getElementById('subdomainDropdown').addEventListener('change', (e) => {
         updateIndicators(e.target.value, allDataSets);
+        updateMapAndTextBasedOnSelection(g, allDataSets, getSelectedDomain(), getSelectedSubdomain(), getSelectedIndicator());
+
     });
+
+    document.getElementById('indicatorDropdown').addEventListener('change', function() {
+        const selectedIndicator = this.value;
+        updateMapAndTextBasedOnSelection(g, allDataSets, getSelectedDomain(), getSelectedSubdomain(), getSelectedIndicator());
+      });
 
   }
 

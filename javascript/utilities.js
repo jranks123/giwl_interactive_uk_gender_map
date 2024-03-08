@@ -25,18 +25,70 @@ export function getSelectedDataSet(allDataSets) {
      return index;
 }
 
+
+export function getSelectedDomain() {
+  // Get the selected dataset value from the dropdown
+  return document.getElementById('domainDropdown').value;  
+}
+
+export function getSelectedSubdomain() {
+  // Get the selected dataset value from the dropdown
+  return document.getElementById('subdomainDropdown').value;  
+}
+
+export function getSelectedIndicator() {
+  // Get the selected dataset value from the dropdown
+  return document.getElementById('indicatorDropdown').value;  
+}
+
+
+function getDomainFromDomainsArray(domains, domainName) {
+  const domainObject = domains.find(dom => dom.name === domainName)
+  return domainObject || null
+}
+
+function getSubdomainFromSubdomainsArray(subDomains, subDomainName) {
+  const domainObject = domains.find(dom => dom.name === domainName)
+  return domainObject || null
+}
+
 export function getLADByName(dataSet, ladName) {
   const ladObject = dataSet.find(lad => lad.lad_name === ladName);
   return ladObject || null; // Return the found object or null if not found
 }
 
-export function getLadColour(allDataSets, ladName ) {
+
+function getValueFromDomainSubDomainIndicator(ladFromDataSet ) { 
+  const selectedDomain = getSelectedDomain();
+  const selectedSubdomain = getSelectedSubdomain();
+  const selectedIndicator = getSelectedIndicator();
+
+  if (selectedDomain === "all") {
+    return ladFromDataSet.percentile
+  } else if (selectedSubdomain === "all") {
+      const domain = getDomainFromDomainsArray(ladFromDataSet.domains, selectedDomain);
+      console.log(ladFromDataSet)
+      console.log(domain.name);
+      console.log(domain.percentile);
+      return domain.percentile;      
+  } else if (selectedIndicator === 'all') {
+    return ladFromDataSet[selectedDomain][selectedSubdomain].percentile
+  } else {
+    return ladFromDataSet[selectedDomain][selectedSubdomain][selectedIndicator].percentile
+  }
+}
+
+export function getLadColour(allDataSets, ladName) {
   const dataSet = getSelectedDataSet(allDataSets);
 
   const ladFromDataSet = getLADByName(dataSet, ladName)          
+
   if (ladFromDataSet) {
-    const value = parseFloat(ladFromDataSet.index_overall_percentile); // Ensure this is a number                          
+    
+    const value = parseFloat(getValueFromDomainSubDomainIndicator(ladFromDataSet)); // Ensure this is a number                          
     return value != null ? colorScale(value/100) : "#ccc";
+  
+
   }
   return "#ccc"            
 }
