@@ -2,7 +2,7 @@ import { loadCSVFile, parseDescriptionsCsv, parseCsvToStructuredDataWithDescript
 import { checkIndicatorsHaveDescriptionsAndPrintDistinct } from './qa.js'
 import { updateMapVisualizationBasedOnDataSetChange, updateMapColors, renderMap, createMap } from './mapDrawing.js';
 import { calculateAndStorePercentiles } from './percentiles.js'
-import { getSelectedDataSet } from './utilities.js';
+import { populateDomains } from './domainSelectors.js';
 
 // Usage example with Promises
 loadCSVFile('data/indicator_dictionary.csv', parseDescriptionsCsv)
@@ -44,6 +44,8 @@ loadCSVFile('data/indicator_dictionary.csv', parseDescriptionsCsv)
         // Initial update call to render the default selected dataset view
         updateMapVisualizationBasedOnDataSetChange(g, allDataSets);
         updateMapColors(g, allDataSets);
+
+        populateDomains(allDataSets);
 
 
     })

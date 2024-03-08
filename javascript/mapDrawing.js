@@ -18,8 +18,11 @@ const path = d3.geoPath().projection(projection);
 const color = d3.scaleOrdinal(d3.schemeCategory20c.slice(1, 4));  
 
 
+
+
+
+
 export function updateColourOfSelectedLAD(selectedLAD, i, svg, allDataSets) {    
-  
 
     svg.selectAll("path.selected")
     .classed("selected", false)
@@ -57,7 +60,7 @@ function updateText(ladObject, allDataSets) {
   if (lad) {
 
     const unfilteredData = lad;
-    const excludedFields = ["lad_code", "region_code", "country"];
+    const excludedFields = ["lad_name", "lad_code", "region_code", "country", "domains", 'indexDescriptor'];
   
       // Filter out excluded fields from data
     const data = Object.keys(unfilteredData)
@@ -67,7 +70,7 @@ function updateText(ladObject, allDataSets) {
         return obj;
       }, {});
   
-      let displayText = `<h3>You've selected ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
+      let displayText = `<h3>Local Authority District: ${data.lad_name} </h3>  <button id="toggle-btn">Hide Data</button>`;
       displayText += "<div id=\"data-table\"><table>";
       for (const key in data) {
         if (data.hasOwnProperty(key)) {
@@ -75,6 +78,8 @@ function updateText(ladObject, allDataSets) {
         }
       }
       displayText += "</table></div>";
+      console.log(unfilteredData.indexDescriptor);
+      displayText += `<p>${unfilteredData.indexDescriptor}</p>`;
       d3.select("#map__text").html(displayText);
       // Add the 'selected' class to the clicked district path
   
