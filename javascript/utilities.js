@@ -48,9 +48,15 @@ function getDomainFromDomainsArray(domains, domainName) {
 }
 
 function getSubdomainFromSubdomainsArray(subDomains, subDomainName) {
-  const domainObject = domains.find(dom => dom.name === domainName)
-  return domainObject || null
+  const subdDomainObject = subDomains.find(sub => sub.name === subDomainName)
+  return subdDomainObject || null
 }
+
+function getIndicatorFromIndicatorsArray(indicators, indicatorName) {
+  const indicatorObject = indicators.find(ind => ind.name === indicatorName)
+  return indicatorObject || null
+}
+
 
 export function getLADByName(dataSet, ladName) {
   const ladObject = dataSet.find(lad => lad.lad_name === ladName);
@@ -58,7 +64,7 @@ export function getLADByName(dataSet, ladName) {
 }
 
 
-function getValueFromDomainSubDomainIndicator(ladFromDataSet ) { 
+export function getLadObjectDependingOnDomainSubdomainIndicator(ladFromDataSet ) { 
   const selectedDomain = getSelectedDomain();
   const selectedSubdomain = getSelectedSubdomain();
   const selectedIndicator = getSelectedIndicator();
@@ -66,15 +72,17 @@ function getValueFromDomainSubDomainIndicator(ladFromDataSet ) {
   if (selectedDomain === "all") {
     return ladFromDataSet.percentile
   } else if (selectedSubdomain === "all") {
-      const domain = getDomainFromDomainsArray(ladFromDataSet.domains, selectedDomain);
-      console.log(ladFromDataSet)
-      console.log(domain.name);
-      console.log(domain.percentile);
+      const domain = getDomainFromDomainsArray(ladFromDataSet.domains, selectedDomain);     
       return domain.percentile;      
   } else if (selectedIndicator === 'all') {
-    return ladFromDataSet[selectedDomain][selectedSubdomain].percentile
+    const domain = getDomainFromDomainsArray(ladFromDataSet.domains, selectedDomain);
+    const subdomain = getSubdomainFromSubdomainsArray(domain.subdomains, selectedSubdomain)    
+    return subdomain.percentile
   } else {
-    return ladFromDataSet[selectedDomain][selectedSubdomain][selectedIndicator].percentile
+    const domain = getDomainFromDomainsArray(ladFromDataSet.domains, selectedDomain);
+    const subdomain = getSubdomainFromSubdomainsArray(domain.subdomains, selectedSubdomain)    
+    const indicator = getIndicatorFromIndicatorsArray(subdomain.indicators, selectedIndicator)    
+    return indicator.percentile
   }
 }
 
@@ -84,11 +92,9 @@ export function getLadColour(allDataSets, ladName) {
   const ladFromDataSet = getLADByName(dataSet, ladName)          
 
   if (ladFromDataSet) {
-    
-    const value = parseFloat(getValueFromDomainSubDomainIndicator(ladFromDataSet)); // Ensure this is a number                          
+    const subObject = getLadObjectDependingOnDomainSubdomainIndicator(ladFromDataSet)
+    const value = parseFloat(subObject); // Ensure this is a number                          
     return value != null ? colorScale(value/100) : "#ccc";
-  
-
   }
   return "#ccc"            
 }

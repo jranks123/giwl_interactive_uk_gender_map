@@ -1,4 +1,4 @@
-import { getSelectedDataSet, getLADByName, getLadColour, getSelectedDomain, getSelectedIndicator, getSelectedSubdomain } from './utilities.js';
+import { getSelectedDataSet, getLADByName, getLadColour, getLadObjectDependingOnDomainSubdomainIndicator } from './utilities.js';
 
 const WIDTH = window.innerWidth;
 const HEIGHT = window.innerHeight;
@@ -17,10 +17,6 @@ const HOVER_COLOR = "#d36f80";
 const path = d3.geoPath().projection(projection);
 const color = d3.scaleOrdinal(d3.schemeCategory20c.slice(1, 4));  
 
-
-
-
-
 export function updateMapAndTextBasedOnSelection(g, allDataSets) {
 
   const selectedDataSet = getSelectedDataSet(allDataSets)
@@ -32,9 +28,16 @@ export function updateMapAndTextBasedOnSelection(g, allDataSets) {
     return getLadColour(allDataSets, ladName);
   });
 
-  // Update displayed text
-  //updateTextBasedOnSelection(filteredData, selectedDomain, selectedSubdomain, selectedIndicator);
+
+    // TODO: try and figure out how to update text
+
+
+  //ladObj = getLadObjectDependingOnDomainSubdomainIndicator(currentLad)
+  // // Update displayed text
+  // updateText(ladObj, allDataSets);
 }
+
+
 
 
 
@@ -42,7 +45,7 @@ export function updateColourOfSelectedLAD(selectedLAD, i, svg, allDataSets) {
 
     svg.selectAll("path.selected")
     .classed("selected", false)
-    .attr("fill", d => {  
+    .attr("fill", d => {        
       return getLadColour(allDataSets, d.properties.LAD13NM)        
     });
 
